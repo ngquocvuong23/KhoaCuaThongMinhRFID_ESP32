@@ -1,0 +1,40 @@
+<h1>GỬI THÔNG BÁO</h1>
+<button class="unlock-button" onclick="sendCommand('unlock')">UNLOCK</button>
+<button class="reset-button" onclick="sendCommand('reset')">RESET</button>
+
+<div id="toast" class="toast">Đã gửi!</div>
+
+<script>
+  const toast = document.getElementById('toast');
+
+  function showToast(message, isError = false) {
+    toast.textContent = message;
+    toast.classList.add('show');
+    if (isError) toast.classList.add('error');
+
+    setTimeout(() => {
+      toast.classList.remove('show', 'error');
+      toast.textContent = '';
+    }, 3000);
+  }
+
+  function sendCommand(action) {
+    fetch(`http://localhost:3000/esp32/${action}`)
+      .then(response => {
+        if (!response.ok) {
+          return response.text().then(errText => {
+            throw new Error('Server response was not OK: ' + errText);
+          });
+        }
+        return response.text();
+      })
+      .then(data => {
+        console.log('Server response:', data);
+        showToast('Đã gửi!');
+      })
+      .catch(error => {
+        console.error('Lỗi kết nối server:', error.message);
+        showToast('Lỗi kết nối server: ' + error.message, true);
+      });
+  }
+</script>
